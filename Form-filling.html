@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Application Form</title>
+    <style>
+        /* Modern CSS Reset and Base Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #333;
+            overflow-y: scroll;
+        }
+
+        /* Form Container */
+        .form-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            margin-bottom: 100px;
+            background: rgba(255, 255, 255, 0.98);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Step Progress Bar */
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            position: relative;
+            padding: 0 40px;
+            margin-top: 30px;
+        }
+
+        .step-indicator::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50px;
+            right: 50px;
+            height: 3px;
+            background: #e0e0e0;
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+
+        .step-dot {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #666;
+            position: relative;
+            z-index: 2;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .step-dot::after {
+            content: attr(data-step);
+            position: absolute;
+            bottom: -25px;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .step-dot.active {
+            background: #3f59c9;
+            border-color: #3f59c9;
+            color: white;
+            transform: scale(1.2);
+            box-shadow: 0 0 20px rgb(91, 97, 179);
+        }
+
+        .step-dot.completed {
+            background: #3f59c9;
+            border-color: #3f59c9;
+            color: white;
+        }
+
+        /* Step Content */
+        .step {
+            display: none;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.5s ease;
+        }
+
+        .step.active {
+            display: block;
+            opacity: 1;
+            transform: translateX(0);
+            animation: slideIn 0.5s forwards;
+        }
+
+        .step.previous {
+            transform: translateX(-100%);
+        }
+
+        /* Form Groups */
+        .form-group {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.5s forwards;
+            animation-delay: calc(var(--animation-order) * 0.1s);
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2c3e50;
+            font-size: 0.95rem;
+        }
+
+        /* Input Styles */
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            background: #fff;
+            transition: all 0.3s ease;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: #3f59c9;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+            outline: none;
+        }
+
+        /* Document Upload Styling */
+        .document-upload-section {
+            margin: 20px 0;
+        }
+
+        .upload-box {
+            border: 2px dashed #3f59c9;
+            border-radius: 12px;
+            padding: 30px 20px;
+            text-align: center;
+            background: rgba(63, 89, 201, 0.03);
+            transition: all 0.3s ease;
+            position: relative;
+            margin-bottom: 25px;
+            cursor: pointer;
+        }
+
+        .upload-box:hover {
+            background: rgba(63, 89, 201, 0.06);
+            border-color: #2a3d8f;
+        }
+
+        .upload-box.drag-over {
+            background: rgba(63, 89, 201, 0.1);
+            border-color: #2a3d8f;
+            transform: scale(1.01);
+        }
+
+        /* Upload Icon */
+        .upload-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 15px;
+            background: rgba(63, 89, 201, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .upload-icon svg {
+            width: 30px;
+            height: 30px;
+            color: #3f59c9;
+        }
+
+        /* Upload Text */
+        .upload-text {
+            margin-bottom: 10px;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .upload-subtext {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        /* File Input */
+        .upload-box input[type="file"] {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        /* File Preview */
+        .file-preview {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            margin-top: 10px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+        }
+
+        .file-preview.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .file-info {
+            flex-grow: 1;
+            margin-left: 12px;
+        }
+
+        .file-name {
+            font-weight: 500;
+            color: #2c3e50;
+            margin-bottom: 2px;
+        }
+
+        .file-size {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        /* Remove File Button */
+        .remove-file {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .remove-file:hover {
+            background: rgba(220, 53, 69, 0.2);
+        }
+
+        /* Navigation Buttons */
+        .buttons {
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+            justify-content: space-between;
+        }
+
+        button {
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #prevBtn {
+            background: transparent;
+            color: #666;
+            border: 2px solid #e0e0e0;
+        }
+
+        #nextBtn, #submitBtn {
+            background: #3f59c9;
+            color: white;
+            border: none;
+            box-shadow: 0 4px 6px rgba(76, 175, 80, 0.2);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Error Messages */
+        .error {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+            animation: shake 0.4s ease-in-out;
+        }
+
+        /* Animations */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        /* Dark Mode Support */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: linear-gradient(135deg, #1a1a1a 0%, #2d3436 100%);
+            }
+            
+            .form-container {
+                background: rgba(30, 30, 30, 0.95);
+                color: #fff;
+            }
+            
+            .form-group {
+                background: #2d2d2d;
+            }
+            
+            input, select {
+                background: #2d2d2d;
+                color: #fff;
+                border-color: #404040;
+            }
+            
+            label {
+                color: #e0e0e0;
+            }
+            
+            #prevBtn {
+                background: #2d2d2d;
+                color: #fff;
+                border-color: #404040;
+            }
+            
+            .upload-box {
+                background: rgba(63, 89, 201, 0.1);
+                border-color: #4a6bd4;
+            }
+            
+            .upload-box:hover {
+                background: rgba(63, 89, 201, 0.15);
+            }
+            
+            .upload-text {
+                color: #e0e0e0;
+            }
+            
+            .upload-subtext {
+                color: #aaa;
+            }
+            
+            .file-preview {
+                background: #2d2d2d;
+            }
+            
+            .file-name {
+                color: #e0e0e0;
+            }
+            
+            .file-size {
+                color: #aaa;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .form-container {
+                padding: 20px;
+            }
+            
+            .step-indicator {
+                padding: 0 20px;
+            }
+            
+            .step-dot {
+                width: 35px;
+                height: 35px;
+                font-size: 14px;
+            }
+            
+            .buttons {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+            }
+
+            .upload-box {
+                padding: 20px 15px;
+            }
+            
+            .upload-icon {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .upload-icon svg {
+                width: 25px;
+                height: 25px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            header {
+                padding: 10px 15px;
+            }
+
+            img {
+                height: 40px;
+                width: auto;
+            }
+
+            h1 {
+                font-size: 15px;
+            }
+        }
+
+         .download-button {
+            display: none;
+            margin: 20px auto;
+            padding: 14px 28px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            max-width: 250px;
+        }
+
+        .download-button:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Dark mode support for download button */
+        @media (prefers-color-scheme: dark) {
+            .download-button {
+                background: #45a049;
+            }
+            
+            .download-button:hover {
+                background: #3d8b41;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <header style="display: flex; text-align: center; justify-content: center;align-items: center;">
+            <!-- <img src="./Assests/ATS Wallpaper.jpg" height="50px" width="100px" alt=""> -->
+            <h1 style="justify-content: center;">APPLICATION FORM</h1>
+        </header>
+        <div class="step-indicator">
+            <div class="step-dot active">1</div>
+            <div class="step-dot">2</div>
+            <div class="step-dot">3</div>
+            <div class="step-dot">4</div>
+        </div>
+
+        <form id="applicationForm">
+            <!-- Step 1: Personal Information -->
+            <div class="step active" id="step1">
+                <div class="form-group">
+                    <label for="fullName">Full Name *</label>
+                    <input type="text" id="fullName" required>
+                    <div class="error">Please enter your full name</div>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email *</label>
+                    <input type="email" id="email" required>
+                    <div class="error">Please enter a valid email address</div>
+                </div>
+                <div class="form-group">
+                    <label for="mobile">Mobile Number *</label>
+                    <input type="tel" id="mobile" required>
+                    <div class="error">Please enter a valid 10-digit mobile number</div>
+                </div>
+                <div class="form-group">
+                    <label for="guardianName">Guardian Name *</label>
+                    <input type="text" id="guardianName" required>
+                    <div class="error">Please enter guardian name</div>
+                </div>
+                <div class="form-group">
+                    <label for="guardianNumber">Guardian Number *</label>
+                    <input type="tel" id="guardianNumber" required>
+                    <div class="error">Please enter a valid 10-digit guardian number</div>
+                </div>
+                <div class="form-group">
+                    <label for="guardianRelation">Guardian Relation *</label>
+                    <input type="text" id="guardianRelation" required>
+                    <div class="error">Please enter guardian relation</div>
+                </div>
+                <div class="form-group">
+                    <label for="address">Address *</label>
+                    <input type="text" id="address" required>
+                    <div class="error">Please enter your address</div>
+                </div>
+            </div>
+
+            <!-- Step 2: Job Preferences -->
+            <div class="step" id="step2">
+                <div class="form-group">
+                    <label for="preferredLocation">Preferred Location *</label>
+                    <select id="preferredLocation" required>
+                        <option value="">Select Location</option>
+                        <option value="bangalore">Bangalore</option>
+                        <option value="Pune">Pune</option>
+                        <option value="Hyderabad">Hyderabad</option>
+                    </select>
+                    <div class="error">Please select a preferred location</div>
+                </div>
+                <div class="form-group">
+                    <label for="role">Role *</label>
+                    <select id="role" required>
+                        <option value="">Select Role</option>
+                        <option value="fresher">Fresher</option>
+                        <option value="experienced">Experienced</option>
+                    </select>
+                    <div class="error">Please select a role</div>
+                </div>
+            </div>
+
+            <!-- Step 3: Documents -->
+            <div class="step" id="step3">
+                <div class="document-upload-section">
+                    <!-- 10th Document Upload -->
+                    <div class="form-group">
+                        <label for="tenthDoc">10th Document *</label>
+                        <div class="upload-box" id="tenthDocUpload">
+                            <div class="upload-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="17 8 12 3 7 8"/>
+                                    <line x1="12" y1="3" x2="12" y2="15"/>
+                                </svg>
+                            </div>
+                            <div class="upload-text">Upload 10th Document</div>
+                            <div class="upload-subtext">Drag & drop your file here or click to browse</div>
+                            <input type="file" id="tenthDoc" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" required>
+                            <div class="file-preview" id="tenthDocPreview"></div>
+                        </div>
+                        <div class="error">Please upload 10th document</div>
+                    </div>
+
+                    <!-- 12th Document Upload -->
+                    <div class="form-group">
+                        <label for="twelfthDoc">12th Document *</label>
+                        <div class="upload-box" id="twelfthDocUpload">
+                            <div class="upload-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="17 8 12 3 7 8"/>
+                                    <line x1="12" y1="3" x2="12" y2="15"/>
+                                </svg>
+                            </div>
+                            <div class="upload-text">Upload 12th Document</div>
+                            <div class="upload-subtext">Drag & drop your file here or click to browse</div>
+                            <input type="file" id="twelfthDoc" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" required>
+                            <div class="file-preview" id="twelfthDocPreview"></div>
+                        </div>
+                        <div class="error">Please upload 12th document</div>
+                    </div>
+
+                    <!-- Graduation Document Upload -->
+                    <div class="form-group">
+                        <label for="graduationDoc">Graduation Document *</label>
+                        <div class="upload-box" id="graduationDocUpload">
+                            <div class="upload-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="17 8 12 3 7 8"/>
+                                    <line x1="12" y1="3" x2="12" y2="15"/>
+                                </svg>
+                            </div>
+                            <div class="upload-text">Upload Graduation Document</div>
+                            <div class="upload-subtext">Drag & drop your file here or click to browse</div>
+                            <input type="file" id="graduationDoc" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" required>
+                            <div class="file-preview" id="graduationDocPreview"></div>
+                        </div>
+                        <div class="error">Please upload graduation document</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: Experience Details -->
+            <div class="step" id="step4">
+                <div id="previousCompanyDetails">
+                    <div class="form-group">
+                        <label for="companyName">Company Name *</label>
+                        <input type="text" id="companyName">
+                        <div class="error">Please enter company name</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="companyLocation">Location *</label>
+                        <input type="text" id="companyLocation">
+                        <div class="error">Please enter company location</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="previousRole">Role *</label>
+                        <input type="text" id="previousRole">
+                        <div class="error">Please enter your role</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="experienceLetter">Experience Letter *</label>
+                        <div class="upload-box" id="experienceLetterUpload">
+                            <div class="upload-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="17 8 12 3 7 8"/>
+                                    <line x1="12" y1="3" x2="12" y2="15"/>
+                                </svg>
+                            </div>
+                            <div class="upload-text">Upload Experience Letter</div>
+                            <div class="upload-subtext">Drag & drop your file here or click to browse</div>
+                            <input type="file" id="experienceLetter" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                            <div class="file-preview" id="experienceLetterPreview"></div>
+                        </div>
+                        <div class="error">Please upload experience letter</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastProject">Last Project Name *</label>
+                        <input type="text" id="lastProject">
+                        <div class="error">Please enter last project name</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="buttons">
+                <button type="button" id="prevBtn" style="display: none;">Previous</button>
+                <button type="button" id="nextBtn">Next</button>
+                <button type="submit" id="submitBtn" style="display: none;">Submit</button>
+                <button id="downloadOfferLetter" class="download-button">Download Offer Letter</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        const form = document.getElementById('applicationForm');
+        const steps = document.querySelectorAll('.step');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const submitBtn = document.getElementById('submitBtn');
+        const stepDots = document.querySelectorAll('.step-dot');
+
+        // Show/hide previous company details based on role selection
+        document.getElementById('role').addEventListener('change', function() {
+            const previousCompanyDetails = document.getElementById('previousCompanyDetails');
+            if (this.value === 'experienced') {
+                previousCompanyDetails.style.display = 'block';
+                previousCompanyDetails.querySelectorAll('input').forEach(input => input.required = true);
+            } else {
+                previousCompanyDetails.style.display = 'none';
+                previousCompanyDetails.querySelectorAll('input').forEach(input => input.required = false);
+            }
+        });
+
+       // Get all upload boxes
+document.querySelectorAll('.upload-box').forEach(uploadBox => {
+    const input = uploadBox.querySelector('input[type="file"]');
+    const preview = uploadBox.querySelector('.file-preview');
+
+    // File input change handler
+    input.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            // Validate file size
+            const maxSize = 5 * 1024 * 1024; // 5MB
+            if (file.size > maxSize) {
+                alert('File size should not exceed 5MB');
+                this.value = '';
+                return;
+            }
+
+            // Create and show preview
+            const previewContent = `
+                <div class="file-info">
+                    <div class="file-name">${file.name}</div>
+                    <div class="file-size">${formatFileSize(file.size)}</div>
+                </div>
+                <button type="button" class="remove-file">Remove</button>
+            `;
+            preview.innerHTML = previewContent;
+            preview.style.display = 'flex';
+            preview.style.opacity = '1';
+            preview.style.alignItems = 'center';
+            preview.style.justifyContent = 'space-between';
+            preview.style.marginTop = '10px';
+            preview.style.backgroundColor = '#FFFFFF';
+            preview.style.padding = '10px';
+            preview.style.borderRadius = '8px';
+            
+            // Add remove button functionality
+            const removeButton = preview.querySelector('.remove-file');
+            removeButton.addEventListener('click', function() {
+                input.value = '';
+                preview.innerHTML = '';
+                preview.style.display = 'none';
+            });
+
+            // Clear any existing error messages
+            const errorDiv = input.closest('.form-group').querySelector('.error');
+            if (errorDiv) {
+                errorDiv.style.display = 'none';
+            }
+        }
+    });
+
+    // Drag and drop handlers
+    uploadBox.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadBox.classList.add('drag-over');
+    });
+
+    uploadBox.addEventListener('dragleave', () => {
+        uploadBox.classList.remove('drag-over');
+    });
+
+    uploadBox.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadBox.classList.remove('drag-over');
+        if (e.dataTransfer.files.length) {
+            input.files = e.dataTransfer.files;
+            // Trigger the change event manually
+            const event = new Event('change', { bubbles: true });
+            input.dispatchEvent(event);
+        }
+    });
+});
+
+// Helper function to format file size
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+        // Validation functions
+        function validateStep1() {
+            const fullName = document.getElementById('fullName').value;
+            const email = document.getElementById('email').value;
+            const mobile = document.getElementById('mobile').value;
+            const guardianName = document.getElementById('guardianName').value;
+            const guardianNumber = document.getElementById('guardianNumber').value;
+            const guardianRelation = document.getElementById('guardianRelation').value;
+            const address = document.getElementById('address').value;
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const phoneRegex = /^\d{10}$/;
+            const minAlphaRegex =  /^[A-Za-z\s]{5,}$/;
+
+            let isValid = true;
+
+            if (!fullName || !minAlphaRegex.test(fullName.replace(/\s/g, ''))) {
+                alert("Full Name must contain at least 5 alphabetical characters.");
+                showError('fullName');
+                isValid = false;
+            }
+            if (!email || !emailRegex.test(email)) {
+                alert("Please enter a valid email address.");
+                showError('email');
+                isValid = false;
+            }
+            if (!mobile || !phoneRegex.test(mobile)) {
+                alert("Mobile number must be 10 digits.");
+                showError('mobile');
+                isValid = false;
+            }
+            if (!guardianName || !minAlphaRegex.test(guardianName.replace(/\s/g, ''))) {
+                alert("Guardian Name must contain at least 5 alphabetical characters.");
+                showError('guardianName');
+                isValid = false;
+            }
+            if (!guardianNumber || !phoneRegex.test(guardianNumber)) {
+                alert("Guardian Mobile number must be 10 digits.");
+                showError('guardianNumber');
+                isValid = false;
+            }
+            if (!guardianRelation || !minAlphaRegex.test(guardianRelation.replace(/\s/g, ''))) {
+                alert("Relation must contain at least 5 alphabetical characters.");
+                showError('guardianRelation');
+                isValid = false;
+            }
+            if (!address || !minAlphaRegex.test(address.replace(/\s/g, ''))) {
+                alert("Address must contain at least 5 alphabetical characters.");
+                showError('address');
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        function validateStep2() {
+            const preferredLocation = document.getElementById('preferredLocation').value;
+            const role = document.getElementById('role').value;
+
+            let isValid = true;
+
+            if (!preferredLocation) {
+                showError('preferredLocation');
+                isValid = false;
+            }
+            if (!role) {
+                showError('role');
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        function validateStep3() {
+    const tenthDoc = document.getElementById('tenthDoc');
+    const twelfthDoc = document.getElementById('twelfthDoc');
+    const graduationDoc = document.getElementById('graduationDoc');
+
+    let isValid = true;
+
+    if (!tenthDoc.files || !tenthDoc.files.length) {
+        alert("Please upload your 10th-grade document.");
+        showError('tenthDoc');
+        isValid = false;
+    }
+    if (!twelfthDoc.files || !twelfthDoc.files.length) {
+        alert("Please upload your 12th-grade document.");
+        showError('twelfthDoc');
+        isValid = false;
+    }
+    if (!graduationDoc.files || !graduationDoc.files.length) {
+        alert("Please upload your graduation document.");
+        showError('graduationDoc');
+        isValid = false;
+    }
+
+    return isValid;
+}
+
+        function validateStep4() {
+    const role = document.getElementById('role').value;
+    if (role !== 'experienced') return true;
+
+    const companyName = document.getElementById('companyName').value;
+    const companyLocation = document.getElementById('companyLocation').value;
+    const previousRole = document.getElementById('previousRole').value;
+    const experienceLetter = document.getElementById('experienceLetter').value;
+    const lastProject = document.getElementById('lastProject').value;
+
+    const minAlphaRegex =  /^[A-Za-z\s]{5,}$/;   // Regex to ensure at least 5 alphabetic characters
+
+    let isValid = true;
+
+    if (!companyName || !minAlphaRegex.test(companyName.replace(/\s/g, ''))) {
+        alert("Company Name must contain at least 5 alphabetical characters.");
+        showError('companyName');
+        isValid = false;
+    }
+    if (!companyLocation || !minAlphaRegex.test(companyLocation.replace(/\s/g, ''))) {
+        alert("Company Location must contain at least 5 alphabetical characters.");
+        showError('companyLocation');
+        isValid = false;
+    }
+    if (!previousRole || !minAlphaRegex.test(previousRole.replace(/\s/g, ''))) {
+        alert("Role Name must contain at least 5 alphabetical characters.");
+        showError('previousRole');
+        isValid = false;
+    }
+    if (!experienceLetter) {
+        alert("Experience Letter is required.");
+        showError('experienceLetter');
+        isValid = false;
+    }
+    if (!lastProject || !minAlphaRegex.test(lastProject.replace(/\s/g, ''))) {
+        alert("Last Project must contain at least 5 alphabetical characters.");
+        showError('lastProject');
+        isValid = false;
+    }
+
+    return isValid;
+}
+
+        function showError(fieldId) {
+            const field = document.getElementById(fieldId);
+            const errorDiv = field.nextElementSibling;
+            errorDiv.style.display = 'block';
+            field.addEventListener('input', function() {
+                errorDiv.style.display = 'none';
+            });
+        }
+
+        function updateButtons() {
+            prevBtn.style.display = currentStep === 1 ? 'none' : 'block';
+            nextBtn.style.display = currentStep === 4 ? 'none' : 'block';
+            submitBtn.style.display = currentStep === 4 ? 'block' : 'none';
+        }
+
+        function updateStepIndicator() {
+            stepDots.forEach((dot, index) => {
+                dot.classList.toggle('active', index + 1 <= currentStep);
+            });
+        }
+
+        // Function to convert file to base64
+        function getBase64(file) {
+            return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+            });
+        }
+
+        // Function to handle file validation and conversion
+async function processFiles(filesObject) {
+    const processedFiles = {};
+    for (const [key, file] of Object.entries(filesObject)) {
+        if (file) {
+            try {
+                processedFiles[key] = await getBase64(file);
+            } catch (error) {
+                console.error(`Error processing ${key}:`, error);
+                alert(`Error processing ${key}. Please try again.`);
+                throw error;
+            }
+        }
+    }
+    return processedFiles;
+}
+
+
+        // Function to save form data
+        function saveFormData(formData) {
+            let submissions = JSON.parse(localStorage.getItem('formSubmissions')) || [];
+            formData.id = Date.now();
+            formData.submissionDate = new Date().toISOString();
+            formData.status = 'new';
+            submissions.push(formData);
+            localStorage.setItem('formSubmissions', JSON.stringify(submissions));
+        }
+
+        // Handle form navigation
+        prevBtn.addEventListener('click', () => {
+            if (currentStep > 1) {
+                document.querySelector(`#step${currentStep}`).classList.remove('active');
+                currentStep--;
+                document.querySelector(`#step${currentStep}`).classList.add('active');
+                updateButtons();
+                updateStepIndicator();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            let isValid = false;
+            
+            switch(currentStep) {
+                case 1:
+                    isValid = validateStep1();
+                    break;
+                case 2:
+                    isValid = validateStep2();
+                    break;
+                case 3:
+                    isValid = validateStep3();
+                    break;
+            }
+
+            if (isValid && currentStep < 4) {
+                // Continuation of nextBtn click handler
+                document.querySelector(`#step${currentStep}`).classList.remove('active');
+                currentStep++;
+                document.querySelector(`#step${currentStep}`).classList.add('active');
+                updateButtons();
+                updateStepIndicator();
+            }
+        });
+
+       // Updated form submission handler
+form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (validateStep4()) {
+        try {
+            // Process document files
+            const documentFiles = {
+                tenthDoc: document.getElementById('tenthDoc').files[0],
+                twelfthDoc: document.getElementById('twelfthDoc').files[0],
+                graduationDoc: document.getElementById('graduationDoc').files[0]
+            };
+
+            const processedDocuments = await processFiles(documentFiles);
+
+            // Gather form data
+            const formData = {
+                fullName: document.getElementById('fullName').value,
+                email: document.getElementById('email').value,
+                mobile: document.getElementById('mobile').value,
+                guardianName: document.getElementById('guardianName').value,
+                guardianNumber: document.getElementById('guardianNumber').value,
+                guardianRelation: document.getElementById('guardianRelation').value,
+                address: document.getElementById('address').value,
+                preferredLocation: document.getElementById('preferredLocation').value,
+                role: document.getElementById('role').value,
+                documents: processedDocuments
+            };
+
+            // Add company details if experienced
+            if (formData.role === 'experienced') {
+                const experienceLetterFile = {
+                    experienceLetter: document.getElementById('experienceLetter').files[0]
+                };
+                const processedExperienceLetter = await processFiles(experienceLetterFile);
+
+                formData.company = {
+                    name: document.getElementById('companyName').value,
+                    location: document.getElementById('companyLocation').value,
+                    role: document.getElementById('previousRole').value,
+                    lastProject: document.getElementById('lastProject').value,
+                    experienceLetter: processedExperienceLetter.experienceLetter
+                };
+            }
+
+            // Save form data
+            saveFormData(formData);
+            
+            // Reset form and show success message
+            alert('Application submitted successfully!');
+            // Show offer letter download prompt
+            const downloadPrompt = confirm('To download Offer letter click OK');
+                    if (downloadPrompt) {
+                        const downloadButton = document.getElementById('downloadOfferLetter');
+                        downloadButton.style.display = 'block';
+                    }
+
+            form.reset();
+            currentStep = 1;
+            updateButtons();
+            updateStepIndicator();
+            
+            // Reset file inputs
+            document.querySelectorAll('input[type="file"]').forEach(input => {
+                input.value = '';
+            });
+
+            // Hide previous company details if visible
+            const previousCompanyDetails = document.getElementById('previousCompanyDetails');
+            previousCompanyDetails.style.display = 'none';
+            previousCompanyDetails.querySelectorAll('input').forEach(input => {
+                input.required = false;
+            });
+
+        } catch (error) {
+            console.error('Error submitting form:', error);
+            alert('There was an error submitting your application. Please try again.');
+        }
+    }
+});
+
+// Add file size validation
+function validateFileSize(input) {
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    const file = input.files[0];
+    
+    if (file && file.size > maxSize) {
+        alert('File size should not exceed 5MB');
+        input.value = '';
+        return false;
+    }
+    return true;
+}
+
+// Add file input event listeners
+document.querySelectorAll('input[type="file"]').forEach(input => {
+    input.addEventListener('change', function() {
+        validateFileSize(this);
+    });
+});
+    </script>
+</body>
+</html>
